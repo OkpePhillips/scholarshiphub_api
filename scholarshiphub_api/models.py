@@ -1,6 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, BaseUserManager
-
+from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
+from django.conf import settings
 
 class UserManager(BaseUserManager):
     def create_user(self, first_name, last_name, email, password=None, **extra_fields):
@@ -37,12 +37,15 @@ class User(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name"]
 
+    groups = models.ManyToManyField(Group, related_name='scholarshiphub_groups')
+    user_permissions = models.ManyToManyField(Permission, related_name='scholarshiphub_permissions')
+
     objects = UserManager()
 
 class Scholarship(models.Model):
     title = models.CharField(max_length=255, unique=True)
     description = models.TextField(max_length=3000)
-    eligibility = models.TextFiel(max_length=500)
+    eligibility = models.TextField(max_length=500)
     benefit = models.TextField(max_length=500)
     field_of_study = models.CharField(max_length=255)
     Deadline = models.CharField(max_length=500)

@@ -30,10 +30,13 @@ class ScholarshipSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     replies = serializers.SerializerMethodField()
+    scholarship_id = serializers.PrimaryKeyRelatedField(queryset=Scholarship.objects.all())
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    username = serializers.ReadOnlyField(source='user.username')
 
     class Meta:
         model = Comment
-        fields = ['id', 'user', 'content', 'parent_comment', 'replies', 'created_at']
+        fields = ['id', 'username', 'user','content', 'parent_comment', 'replies', 'created_at', 'scholarship_id']
     
     def get_replies(self, obj):
         if obj.replies:
@@ -42,6 +45,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class StatementOfPurposeSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = StatementOfPurpose
         fields = ['user', 'title', 'sop_file', 'submission_date', 'is_reviewed', 'reviewed_sop']
@@ -73,3 +78,12 @@ class StatementOfPurposeEditSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+
+class ResetPasswordEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)

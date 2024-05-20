@@ -1,0 +1,10 @@
+Scholarship
+{
+    "title": "Mastercard Foundation Scholarship",
+    "description": "The Mastercard Foundation Scholarship provides financial support to African students with demonstrated academic excellence and leadership potential.",
+    "benefit": "Full tuition fees, accommodation, books, and living expenses",
+    "eligibility": "First Degree in a STEM-related course",
+    "field_of_study": "Computer Science, Software Engineering, BioInformatics",
+    "deadline": "July, 2024",
+    "link": "https://mastercardfdn.org/programs/scholars/"
+  }

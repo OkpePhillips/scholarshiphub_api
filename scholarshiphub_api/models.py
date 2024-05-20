@@ -23,7 +23,7 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_verified', True)
 
-        return self.create_user(self, first_name, last_name, email, password, **extra_fields)
+        return self.create_user(first_name, last_name, email, password, **extra_fields)
 
 
 class User(AbstractUser):
@@ -48,12 +48,12 @@ class Scholarship(models.Model):
     eligibility = models.TextField(max_length=500)
     benefit = models.TextField(max_length=500)
     field_of_study = models.CharField(max_length=255)
-    Deadline = models.CharField(max_length=500)
+    deadline = models.CharField(max_length=500)
     link = models.CharField(max_length=500)
     image = models.ImageField(verbose_name="Scholarship Image", upload_to="scholarship_images/", null=True, blank=True)
 
 class Comment(models.Model):
-    scholarship = models.ForeignKey(Scholarship, related_name='comments', on_delete=models.CASCADE)
+    scholarship_id = models.ForeignKey(Scholarship, related_name='comments', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField(max_length=1000)
     created_at = models.DateTimeField(auto_now_add=True)

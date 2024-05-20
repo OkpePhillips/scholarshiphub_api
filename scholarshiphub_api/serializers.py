@@ -3,10 +3,11 @@ from .models import User, Scholarship, Comment, StatementOfPurpose
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
+    is_verified = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'email', 'username', 'password']
+        fields = ['id', 'first_name', 'last_name', 'email', 'username', 'password', 'is_verified']
     
     def create(self, validated_data):
         user = User(

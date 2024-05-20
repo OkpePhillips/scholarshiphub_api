@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,8 +21,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ywzdi0cnwqd$h&5f-ogf2r0jk)mq06zs_(g)l8itcn(ip)53b!'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
+JWT_SECRET = os.environ.get('JWT_SECRET')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -39,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'scholarshiphub_api',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +53,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+}
+
 
 ROOT_URLCONF = 'scholarshiphub.urls'
 
@@ -124,5 +134,17 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-API_BASE_URL = "http://127.0.0.1"
+API_BASE_URL = "http://127.0.0.1:8000"
 DEFAULT_FROM_EMAIL = "Scholastica@scholashiphub.com"
+
+AUTH_USER_MODEL = "scholarshiphub_api.User"
+
+# Email configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'okpegodwinfather@gmail.com'
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')  # This should be stored securely and not hardcoded
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# DEFAULT_FROM_EMAIL = 'okpegodwinfather@gmail.com'

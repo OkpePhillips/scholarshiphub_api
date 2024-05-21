@@ -144,7 +144,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-API_BASE_URL = "http://127.0.0.1:8000"
+API_BASE_URL = "https://scholarshiphub-api.onrender.com/"
 DEFAULT_FROM_EMAIL = "Scholastica@scholashiphub.com"
 
 AUTH_USER_MODEL = "scholarshiphub_api.User"
@@ -156,5 +156,3 @@ EMAIL_HOST_USER = 'okpegodwinfather@gmail.com'
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')  # This should be stored securely and not hardcoded
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-
-# DEFAULT_FROM_EMAIL = 'okpegodwinfather@gmail.com'

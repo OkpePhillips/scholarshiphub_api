@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'scholarshiphub_api',
     'rest_framework.authtoken',
     'django_rest_passwordreset',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [

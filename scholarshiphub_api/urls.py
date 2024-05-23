@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, LoginView, VerifyEmailView, LogoutView, ScholarshipCreateView, CommentCreateView, StatementOfPurposeCreateView, GetScholarship, GetComments, GetSOP, StatementOfPurposeEditView, CommentEditView, ScholarshipEditView, UserEditView, ChangePasswordView, GetAComment, GetAScholarship
+from .views import RegisterView, LoginView, VerifyEmailView, LogoutView, ScholarshipCreateView, CommentCreateView, StatementOfPurposeCreateView, GetScholarship, GetComments, GetSOP, StatementOfPurposeEditView, CommentEditView, ScholarshipEditView, UserEditView, ChangePasswordView, GetAComment, GetAScholarship, ScholarshipSearchView
 
 from django.urls import re_path
 from rest_framework import permissions
@@ -41,4 +41,5 @@ urlpatterns = [
     path('comments', CommentEditView.as_view(), name='edit-comment'),
     path('sop/<int:id>', StatementOfPurposeEditView.as_view(), name='edit-sop'),
     path('change_password/', ChangePasswordView.as_view(), name='change_password'),
+    path('scholarships/search/', ScholarshipSearchView.as_view(), name='search'),
 ]

@@ -11,6 +11,8 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework import permissions
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.db.models import Q
 
 
 class RegisterView(APIView):
@@ -107,6 +109,9 @@ class LogoutView(APIView):
         operation_summary="Logout a user",
         operation_description="This endpoint deletes the token of a logged in user, effectively logging them out",
         tags=["User Processes"],
+        manual_parameters=[
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+        ],
         responses={
             200: openapi.Response(
                 description="Successful",
@@ -158,6 +163,9 @@ class ScholarshipCreateView(APIView):
         operation_summary="Create a new scholarship",
         operation_description="This endpoint will be used by admin users to create new scholarship objects",
         tags=["Admin Processes"],
+        manual_parameters=[
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+        ],
         request_body=ScholarshipSerializer,
         responses={
             200: openapi.Response(
@@ -201,6 +209,9 @@ class CommentCreateView(APIView):
         operation_summary="Comment on a scholarship",
         operation_description="This endpoint allows a user to create a comment on a scholarship post by providing the scholarship_id",
         tags=["Comments"],
+        manual_parameters=[
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+        ],
         request_body=CommentSerializer,
         responses={
             200: openapi.Response(
@@ -233,12 +244,17 @@ class CommentCreateView(APIView):
 
 class StatementOfPurposeCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
 
     @swagger_auto_schema(
         operation_summary="Submit a request for Statement of Purpose",
         operation_description="This endpoint allows a user to request for review of their Statement of Purpose by submitting their draft",
         tags=["Statement of Purpose"],
-        request_body=StatementOfPurposeSerializer,
+        manual_parameters=[
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+            openapi.Parameter('title', openapi.IN_FORM, description="Description of the SOP", type=openapi.TYPE_STRING, required=True),
+            openapi.Parameter('sop_file', openapi.IN_FORM, description="Statement of Purpose file", type=openapi.TYPE_FILE, required=True),
+        ],
         responses={
             200: openapi.Response(
                 description="Request submitted successfully"),
@@ -372,9 +388,10 @@ class GetAComment(APIView):
 
 class GetSOP(APIView):
     """ Retrieve an SOP object """
+    permission_classes = [permissions.IsAuthenticated]
     @swagger_auto_schema(
         operation_summary="Retrieve StatementOfPurpose objects from the database",
-        operation_description="This endpoint retrieves a specific SOP from the database when an id is passed in, or retrieves all SOPs from the database",
+        operation_description="This endpoint retrieves a specific SOP from the database using an ID",
         tags=["Statement of Purpose"],
         manual_parameters=[
            openapi.Parameter(
@@ -384,6 +401,10 @@ class GetSOP(APIView):
                 type=openapi.TYPE_INTEGER,
                 required=True,
            ),
+            openapi.Parameter(
+                'Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING,
+                required=True,
+            ),
         ],
         responses={
             200: openapi.Response(
@@ -412,6 +433,9 @@ class UserEditView(APIView):
         operation_description="This endpoint allows a user to edit their profile details. However,email cannot be edited",
         tags=["User Processes"],
         request_body=UserEditSerializer,
+        manual_parameters=[
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+        ],
         responses={
             200: openapi.Response(
                 description="Edited user details",
@@ -451,6 +475,9 @@ class ScholarshipEditView(APIView):
         operation_description="This endpoint will be used by admin users to edit a scholarship object",
         tags=["Admin Processes"],
         request_body=ScholarshipEditSerializer,
+        manual_parameters=[
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+        ],
         responses={
             200: openapi.Response(
                 description="Successful",
@@ -489,6 +516,7 @@ class CommentEditView(APIView):
                 type=openapi.TYPE_INTEGER,
                 required=True,
            ),
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
         ],
         responses={
             200: openapi.Response(
@@ -539,6 +567,7 @@ class StatementOfPurposeEditView(APIView):
                 type=openapi.TYPE_INTEGER,
                 required=True,
            ),
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
         ],
         responses={
             200: openapi.Response(
@@ -576,6 +605,9 @@ class ChangePasswordView(APIView):
         operation_description="This endpoint allows a user to change their password by providing the old password, along with the new password",
         tags=["User Processes"],
         request_body=ChangePasswordSerializer,
+        manual_parameters=[
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+        ],
         responses={
             200: openapi.Response(
                 description="Password changed successfully",
@@ -607,3 +639,36 @@ class ChangePasswordView(APIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class ScholarshipSearchView(APIView):
+    """ Search view """
+    @swagger_auto_schema(
+        operation_summary="Search Scholarships",
+        operation_description="This endpoint allows a user to Search for scholarships by title, and other fields in the scholarship table",
+        tags=["Search"],
+        manual_parameters=[
+            openapi.Parameter(
+                'search',
+                openapi.IN_QUERY,
+                description="Search query",
+                type=openapi.TYPE_STRING
+            )
+        ],
+        responses={200: ScholarshipSerializer(many=True)}
+    )
+    def get(self, request, *args, **kwargs):
+        query = request.query_params.get('search', None)
+        if query:
+            queryset = Scholarship.objects.filter(
+                Q(title__icontains=query) |
+                Q(description__icontains=query) |
+                Q(eligibility__icontains=query) |
+                Q(benefit__icontains=query) |
+                Q(field_of_study__icontains=query) |
+                Q(deadline__icontains=query)
+            )
+        else:
+            queryset = Scholarship.objects.all()
+        
+        serializer = ScholarshipSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

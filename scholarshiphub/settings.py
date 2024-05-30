@@ -145,7 +145,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-API_BASE_URL = "https://scholarshiphub-api.onrender.com/"
+API_BASE_URL = "https://scholarshiphub-api.onrender.com"
 DEFAULT_FROM_EMAIL = "Scholastica@scholashiphub.com"
 
 AUTH_USER_MODEL = "scholarshiphub_api.User"

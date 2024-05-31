@@ -769,3 +769,89 @@ class UploadReviewedSOPView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteScholarshipView(APIView):
+    """ View to delete a scholarship by the admin """
+    permission_classes = [permissions.IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_summary="Delete a scholarship post: Admin ONLY",
+        operation_description="This endpoint allows the admin user to delete a scholarship post",
+        tags=["Admin Processes"],
+        manual_parameters=[
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+        ],
+        responses={
+            204: openapi.Response(
+                description="Scholarship deleted successfully",
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+            ),
+        }
+    )
+    def delete(self, request, id):
+        try:
+            scholarship = Scholarship.objects.get(id=id)
+        except Scholarship.DoesNotExist:
+            raise Http404
+        scholarship.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class DeleteCommentView(APIView):
+    """ View to delete a Comment by the admin """
+    permission_classes = [permissions.IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_summary="Delete a comment to a post: Admin ONLY",
+        operation_description="This endpoint allows the admin user to delete a comment on a post",
+        tags=["Admin Processes"],
+        manual_parameters=[
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+        ],
+        responses={
+            204: openapi.Response(
+                description="Comment deleted successfully",
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+            ),
+        }
+    )
+    def delete(self, request, id):
+        try:
+            comment = Comment.objects.get(id=id)
+        except Comment.DoesNotExist:
+            raise Http404
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class DeleteSOPView(APIView):
+    """ View to delete a Statement of Purpose object by the admin """
+    permission_classes = [permissions.IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_summary="Delete a Statement of Purpose to a post: Admin ONLY",
+        operation_description="This endpoint allows the admin user to delete a statement of purpose",
+        tags=["Admin Processes"],
+        manual_parameters=[
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+        ],
+        responses={
+            204: openapi.Response(
+                description="SOP deleted successfully",
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+            ),
+        }
+    )
+    def delete(self, request, id):
+        try:
+            sop = StatementOfPurpose.objects.get(id=id)
+        except StatementOfPurpose.DoesNotExist:
+            raise Http404
+        sop.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

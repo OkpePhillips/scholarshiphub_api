@@ -51,6 +51,11 @@ class StatementOfPurposeSerializer(serializers.ModelSerializer):
         model = StatementOfPurpose
         fields = ['user', 'title', 'sop_file', 'submission_date', 'is_reviewed', 'reviewed_sop']
 
+    def update(self, instance, validated_data):
+        instance.reviewed_sop = validated_data.get('reviewed_sop', instance.reviewed_sop)
+        instance.is_reviewed = True
+        instance.save()
+        return instance
 
 class UserEditSerializer(serializers.ModelSerializer):
     class Meta:

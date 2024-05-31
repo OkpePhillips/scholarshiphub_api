@@ -159,12 +159,14 @@ class VerifyEmailView(APIView):
 class ScholarshipCreateView(APIView):
     """ View for scholarship creation """
     permission_classes = [permissions.IsAdminUser]
+    parser_classes = (FormParser, MultiPartParser)
     @swagger_auto_schema(
         operation_summary="Create a new scholarship",
         operation_description="This endpoint will be used by admin users to create new scholarship objects",
         tags=["Admin Processes"],
         manual_parameters=[
             openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+            openapi.Parameter('image', openapi.IN_FORM, description="Image file for the scholarship", type=openapi.TYPE_FILE, required=True),
         ],
         request_body=ScholarshipSerializer,
         responses={
@@ -548,10 +550,11 @@ class CommentEditView(APIView):
 
 class StatementOfPurposeEditView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
 
-    def get_object(self, sop_id):
+    def get_object(self, id):
         try:
-            return StatementOfPurpose.objects.get(pk=sop_id)
+            return StatementOfPurpose.objects.get(pk=id)
         except StatementOfPurpose.DoesNotExist:
             return None
 
@@ -567,7 +570,9 @@ class StatementOfPurposeEditView(APIView):
                 type=openapi.TYPE_INTEGER,
                 required=True,
            ),
-            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True,
+            ),
+            openapi.Parameter('sop_file', openapi.IN_FORM, description="Statement of Purpose file", type=openapi.TYPE_FILE,required=True),
         ],
         responses={
             200: openapi.Response(
@@ -672,3 +677,95 @@ class ScholarshipSearchView(APIView):
         
         serializer = ScholarshipSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class UserListView(APIView):
+    """ View to retrieve all users by the admin """
+    permission_classes = [permissions.IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_summary="Get All Users: Admin Only",
+        operation_description="This endpoint allows the admin user to retrieve all users in the database",
+        tags=["Admin Processes"],
+        manual_parameters=[
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Successful",
+                schema=UserSerializer(many=True),
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+            ),
+        }
+    )
+    def get(self, request, *args, **kwargs):
+
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class DeleteUserView(APIView):
+    """ View to delete a user by the admin """
+    permission_classes = [permissions.IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_summary="Delete a User: Admin Only",
+        operation_description="This endpoint allows the admin user to delete a user in the database",
+        tags=["Admin Processes"],
+        manual_parameters=[
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+        ],
+        responses={
+            200: openapi.Response(
+                description="User deleted successfully",
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+            ),
+        }
+    )
+    def delete(self, request, id):
+        try:
+            user = User.objects.get(id=id)
+        except User.DoesNotExist:
+            raise Http404
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UploadReviewedSOPView(APIView):
+    """View for an admin to upload a review sop file """
+    permission_classes = [permissions.IsAdminUser]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get_object(self, id):
+        try:
+            return StatementOfPurpose.objects.get(id=id)
+        except StatementOfPurpose.DoesNotExist:
+            raise Http404
+
+    @swagger_auto_schema(
+        operation_summary="Upload a reviewed SOP file: Admin Only",
+        operation_description="This endpoint allows the admin user to upload a reviewed sop file so the user can download it",
+        tags=["Admin Processes"],
+        manual_parameters=[
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+            openapi.Parameter('reviewed_sop', openapi.IN_FORM, description="Reviewed Statement of Purpose file", type=openapi.TYPE_FILE, required=True),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Reviewed sop uploaded",
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+            ),
+        }
+    )
+    def put(self, request, sop_id):
+        sop = self.get_object(sop_id)
+        serializer = ReviewSOPSerializer(sop, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

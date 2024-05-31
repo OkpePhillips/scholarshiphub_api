@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, LoginView, VerifyEmailView, LogoutView, ScholarshipCreateView, CommentCreateView, StatementOfPurposeCreateView, GetScholarship, GetComments, GetSOP, StatementOfPurposeEditView, CommentEditView, ScholarshipEditView, UserEditView, ChangePasswordView, GetAComment, GetAScholarship, ScholarshipSearchView
+from .views import RegisterView, LoginView, VerifyEmailView, LogoutView, ScholarshipCreateView, CommentCreateView, StatementOfPurposeCreateView, GetScholarship, GetComments, GetSOP, StatementOfPurposeEditView, CommentEditView, ScholarshipEditView, UserEditView, ChangePasswordView, GetAComment, GetAScholarship, ScholarshipSearchView, UserListView, DeleteUserView, UploadReviewedSOPView
 
 from django.urls import re_path
 from rest_framework import permissions
@@ -42,4 +42,7 @@ urlpatterns = [
     path('sop/<int:id>', StatementOfPurposeEditView.as_view(), name='edit-sop'),
     path('change_password/', ChangePasswordView.as_view(), name='change_password'),
     path('scholarships/search/', ScholarshipSearchView.as_view(), name='search'),
+    path('users/', UserListView.as_view(), name='user-list'),
+    path('users/<int:id>/', DeleteUserView.as_view(), name='delete-user'),
+    path('sop/<int:id>/review/', UploadReviewedSOPView.as_view(), name='upload-reviewed-sop'),
 ]

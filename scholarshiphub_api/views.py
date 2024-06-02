@@ -462,10 +462,11 @@ class UserEditView(APIView):
         }
     )
     def put(self, request):
-        serializer = UserEditSerializer(data=request.data)
+        user = request.user
+        serializer = UserEditSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -717,8 +718,8 @@ class DeleteUserView(APIView):
             openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
         ],
         responses={
-            200: openapi.Response(
-                description="User deleted successfully",
+            204: openapi.Response(
+                description="",
             ),
             401: openapi.Response(
                 description="Unauthorized",
@@ -855,3 +856,28 @@ class DeleteSOPView(APIView):
             raise Http404
         sop.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class UserDetailView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="get profile: View profile details of logged in user",
+        operation_description="This endpoint displays the details of the logged in user",
+        tags=["User Processes"],
+        manual_parameters=[
+            openapi.Parameter('Authorization', openapi.IN_HEADER, description="Authentication token", type=openapi.TYPE_STRING, required=True),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Successful",
+                schema=UserSerializer(many=True),
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+            ),
+        }
+    )
+    def get(self, request):
+        user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)

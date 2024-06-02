@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework.authtoken.models import Token
 from .models import User, Scholarship, Comment, StatementOfPurpose
-from .serializers import UserSerializer, LoginSerializer, ScholarshipSerializer, CommentSerializer, StatementOfPurposeSerializer, UserEditSerializer, ScholarshipEditSerializer, CommentEditSerializer, StatementOfPurposeEditSerializer, ChangePasswordSerializer
+from .serializers import UserSerializer, LoginSerializer, ScholarshipSerializer, CommentSerializer, StatementOfPurposeSerializer, UserEditSerializer, ScholarshipEditSerializer, CommentEditSerializer, StatementOfPurposeEditSerializer, ChangePasswordSerializer, ReviewSOPSerializer
 from .utils import send_verification_email
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.serializers import AuthTokenSerializer
@@ -266,9 +266,9 @@ class StatementOfPurposeCreateView(APIView):
         }
     )
     def post(self, request):
-        serializer = StatementOfPurposeSerializer(data=request.data)
+        serializer = StatementOfPurposeSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -422,7 +422,7 @@ class GetSOP(APIView):
         }
     )
     def get(self, request, id):     
-        sop = StatementOfPurpose.objects.filter(id=id)
+        sop = StatementOfPurpose.objects.get(id=id)
         serializer = StatementOfPurposeSerializer(sop)
         return Response(serializer.data)
 
@@ -762,8 +762,8 @@ class UploadReviewedSOPView(APIView):
             ),
         }
     )
-    def put(self, request, sop_id):
-        sop = self.get_object(sop_id)
+    def put(self, request, id):
+        sop = self.get_object(id)
         serializer = ReviewSOPSerializer(sop, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()

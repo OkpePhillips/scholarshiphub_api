@@ -31,4 +31,4 @@ The API is properly documented using Django rest framework `Yet Another Swagger 
 
 
 ## Live Link
-[Live API Link](`https://scholarshiphub-api.onrender.com/api/swagger/`)
+[Link](`https://scholarshiphub-api.onrender.com/api/swagger/`)

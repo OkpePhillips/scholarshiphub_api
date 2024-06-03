@@ -41,7 +41,7 @@ class CommentSerializer(serializers.ModelSerializer):
     def get_replies(self, obj):
         if obj.replies:
             return CommentSerializer(obj.replies.all(), many=True).data
-
+        return []
 
 
 class StatementOfPurposeSerializer(serializers.ModelSerializer):

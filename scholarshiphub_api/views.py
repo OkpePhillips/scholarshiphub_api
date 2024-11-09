@@ -631,7 +631,7 @@ class ChangePasswordView(APIView):
     )
     def post(self, request):
         serializer = ChangePasswordSerializer(data=request.data)
-        if serializer.is_va5lid():
+        if serializer.is_valid():
             user = request.user
             old_password = serializer.data.get("old_password")
             new_password = serializer.data.get("new_password")
